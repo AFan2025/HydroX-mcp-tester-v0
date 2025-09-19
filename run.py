@@ -8,10 +8,10 @@ This tool allows you to connect to MCP servers and run security test suites agai
 
 Usage:
     # Run basic security test suite against a stdio server
-    python run.py --server-id local_server --transport stdio --suite basic --cmd python --arg local_server.py
+    python run.py --server-id tester_server --transport stdio --suite basic --cmd python --arg tester_server.py
     
     # Run a specific test from the basic suite
-    python run.py --server-id local_server --transport stdio --suite basic --test tool_description_pinjection --cmd python --arg local_server.py
+    python run.py --server-id tester_server --transport stdio --suite basic --test tool_description_pinjection --cmd python --arg tester_server.py
     
     # Run advanced test suite against an HTTP server
     python run.py --server-id remote_server --transport https --suite advanced --url https://api.example.com/mcp

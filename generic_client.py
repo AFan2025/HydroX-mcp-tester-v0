@@ -18,8 +18,7 @@ try:
     from mcp.client.streamable_http import streamablehttp_client
     from mcp.client.stdio import stdio_client
 except ImportError:
-    print("❌ MCP library not installed. Install with: pip install mcp")
-    print("📚 For development, you can also run: pip install -e .")
+    print("MCP library not installed. Install with: pip install mcp")
     sys.exit(1)
 
 class MCPTesterClient:
@@ -27,7 +26,7 @@ class MCPTesterClient:
         self.transport = transport
         self.logger = logging.getLogger(__name__)
 
-        # server params are a dictionary of key server_id to the value of dictionary for the parameters
+        # server params are a dictionary of key server_id to the va lue of dictionary for the parameters
         #Parameters should be input in the form {"server_id": {<server parameters>}}
         #Parameter values should specify transport type and resulting value
             #Example: {"server1": {"transport": "stdio", "server_params": "StdioServerParameters(...)"}}
@@ -95,7 +94,7 @@ class MCPTesterClient:
     
     async def cleanup(self):
         """Properly close all MCP connections and clean up resources."""
-        self.logger.info("🧹 Cleaning up MCP client connections...")
+        self.logger.info("Cleaning up MCP client connections...")
         
         # Close all exit stacks (this will close sessions and processes)
         for server_id, exit_stack in self.exit_stacks.items():
