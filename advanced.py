@@ -104,7 +104,7 @@ async def cancel_tester(client: MCPTesterClient):
     """
     raise NotImplementedError("cancel_tester is not implemented yet")
 
-ADVANCED_TOOL_REGISTRY: Dict[str, Callable] = {
+ADVANCED_TEST_REGISTRY: Dict[str, Callable] = {
     "timeout_tester": timeout_tester,
     "cancel_tester": cancel_tester,
 }

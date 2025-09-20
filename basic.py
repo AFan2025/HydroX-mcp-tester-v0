@@ -51,7 +51,7 @@ async def tool_response_pinjection(tester_client: MCPTesterClient, **kwargs) -> 
         logger.info(f"Testing server {server_id}")
     raise NotImplementedError("tool_response_pinjection is not implemented yet")
 
-BASIC_TOOL_REGISTRY: Dict[str, Callable] = {
+BASIC_TEST_REGISTRY: Dict[str, Callable] = {
     "tool_description_pinjection": tool_description_pinjection,
     "tool_response_pinjection": tool_response_pinjection,
 }

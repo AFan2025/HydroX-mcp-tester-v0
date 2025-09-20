@@ -31,8 +31,8 @@ import sys
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-from basic import BASIC_TOOL_REGISTRY
-from advanced import ADVANCED_TOOL_REGISTRY
+from basic import BASIC_TEST_REGISTRY
+from advanced import ADVANCED_TEST_REGISTRY
 
 # Add the current directory to Python path to import local modules
 sys.path.append(str(Path(__file__).parent))
@@ -40,9 +40,9 @@ sys.path.append(str(Path(__file__).parent))
 from generic_client import MCPTesterClient
 from mcp import StdioServerParameters
 
-TOOL_REGISTRY = {
-    "basic": BASIC_TOOL_REGISTRY,
-    "advanced": ADVANCED_TOOL_REGISTRY,
+TEST_REGISTRY = {
+    "basic": BASIC_TEST_REGISTRY,
+    "advanced": ADVANCED_TEST_REGISTRY,
 }
 
 # Configure logging
@@ -87,13 +87,13 @@ def create_parser() -> argparse.ArgumentParser:
 
 async def run_tests(tester_client: MCPTesterClient, server_id: str, suite: str, test: Optional[str], test_kwargs: Dict[str, Any]) -> Any:
         try:
-            tool_registry = TOOL_REGISTRY.get(suite)
+            test_registry = TEST_REGISTRY.get(suite)
             common_kwargs = {
                 "server_id": server_id
                 }
             if test:
-                if test in tool_registry:
-                    tool_func = tool_registry[test]
+                if test in test_registry:
+                    tool_func = test_registry[test]
                     logger.info(f"Running specific test '{test}' from suite '{suite}'")
                     await tool_func(tester_client, **common_kwargs)
                 else:
@@ -101,7 +101,7 @@ async def run_tests(tester_client: MCPTesterClient, server_id: str, suite: str, 
                     sys.exit(1)
             else:
                 logger.info(f"Running all tests from suite '{suite}'")
-                for test_name, tool_func in tool_registry.items():
+                for test_name, tool_func in test_registry.items():
                     await tool_func(tester_client, **common_kwargs)
         except Exception as e:
             logger.error(f"Error running tests: {e}")

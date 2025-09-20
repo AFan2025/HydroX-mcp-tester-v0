@@ -22,7 +22,36 @@ except ImportError:
     sys.exit(1)
 
 class MCPTesterClient:
+    """
+    A client for managing and testing Model Context Protocol (MCP) servers. It is the primary client to be used by each test suite
+
+    This class provides methods to configure, connect, and manage multiple MCP server sessions
+    using different transports (e.g., stdio, streamable HTTP/S). It is designed to facilitate
+    automated security and compliance testing of MCP-compatible servers.
+
+    Key Features:
+    - Add and store multiple server configurations (stdio, streamable_http, etc.)
+    - Establish and manage asynchronous connections to MCP servers
+    - Maintain active sessions and handle resource cleanup
+    - Provide a unified interface for test suites to interact with MCP servers
+
+    Attributes:
+        transport (str): The default transport type for new servers (optional).
+        server_params (Dict[str, Dict[str, Any]]): Mapping of server_id to server configuration dicts.
+        sessions (Dict[str, ClientSession]): Active MCP client sessions by server_id.
+        exit_stacks (Dict[str, AsyncExitStack]): Async context managers for resource cleanup per server.
+        logger (logging.Logger): Logger for client events and errors.
+
+    Example usage:
+        client = MCPTesterClient(transport="stdio")
+        client.add_server("local_server", {"transport": "stdio", "server_params": StdioServerParameters(...)})
+        await client.connect_server_stdio("local_server", ...)
+        # ... run tests ...
+        await client.cleanup()
+    """
+
     def __init__(self, transport = None):
+    
         self.transport = transport
         self.logger = logging.getLogger(__name__)
 

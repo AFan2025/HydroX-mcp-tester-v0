@@ -22,7 +22,41 @@ This is the primary python file to run to use as the python CLI tool. You will p
 
 # Explanation of Current Modules
 ## generic_client.py
-This file houses the MCPTesterClient Class, which is the primary client you use to connect to MCP servers.  
+This file houses the MCPTesterClient Class, which is the primary client you use to connect to MCP servers. It is the primary client to be used by each test suite. The goal is for this class to act as a generic connector between multiple different MCP servers and can free have standard or custom tests plugged into the client.
+
+This class provides methods to configure, connect, and manage multiple MCP server sessions using different transports (e.g., stdio, streamable HTTP/S). It is designed to work across different transports to avoid the difficulties testing through both local and third-party hosted MCP servers and tools. 
+
+    Key Features:
+    - Add and store multiple server configurations (stdio, streamable_http, etc.)
+    - Establish and manage asynchronous connections to MCP servers
+    - Maintain active sessions and handle resource cleanup
+    - Provide a unified interface for test suites to interact with MCP servers
+
+    Attributes:
+        transport (str): The default transport type for new servers (optional).
+        server_params (Dict[str, Dict[str, Any]]): Mapping of server_id to server configuration dicts.
+        sessions (Dict[str, ClientSession]): Active MCP client sessions by server_id.
+        exit_stacks (Dict[str, AsyncExitStack]): Async context managers for resource cleanup per server.
+        logger (logging.Logger): Logger for client events and errors.
+
+    Example usage:
+        client = MCPTesterClient(transport="stdio")
+        client.add_server("local_server", {"transport": "stdio", "server_params": StdioServerParameters(...)})
+        await client.connect_server_stdio("local_server", ...)
+        # ... run tests ...
+        await client.cleanup()
+
+## run.py
+This is the file that runs and begins the CLI tool. Read the docstring for the run.py file or the "How to use" steps at the beginning of this markdown in order to see how to use run.py.
+
+## tester_server.py | adversarial_tools.py | sample_tools.py
+This is a mock local server that can be connected to the generic MPC client to demonstrate basic server capabilities. The tester_server is connected through a local stdio transport and connects to both adversarial_tools.py and sample_tools.py as mock adversarial and mock sample tools to test proof of concept/generic form adversarial methods to fine-tune test sensitivity and accuracy. Please feel free to change this as you wish.
+
+# How to add Tests and Servers
+## How to add tests
+To add tests, create a new {testname}.py file that holds your test functionality. Tests should take in any number of parameters and an MCPTesterClient object. The test should run by directly calling the functionality from or through the client as it should already be connected to the target servers upon executing run.py. See Sample Tests for examples.
+
+In order to register the tests within run.py, create a globl dictionary that maps the test name to the callable: i.e. TESTSUITE_INDEX = {"testname": Callable[testname]}. Then, in run.py import the testsuite index and add it to the TEST_REGISTRY index. This is a very simple and not very scalable method of doing this. In order to be more scalable, the next person who works on this testing suite project is recommended to use python decorators as a wrapper to help wrap and register tests, instead of needing to add and change an internal TEST_REGISTRY every time a new suite is added. Hopefully, this method will be deprecated soon, I simply didn't have time to engineer a better solution given my looming end date. 
 
 # Explanation of Sample Tests
 ## basic.py | Basic Tests:
