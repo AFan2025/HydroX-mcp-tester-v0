@@ -102,25 +102,35 @@ class MCPTesterClient:
     async def connect_server_streamable_https(self, server_id: str, server_url: str) -> Optional[ClientSession]:
         """Connect to an MCP server based on its configuration."""
 
-        exit_stack = AsyncExitStack()
-        self.exit_stacks[server_id] = exit_stack
+        # exit_stack = AsyncExitStack()
+        # self.exit_stacks[server_id] = exit_stack
 
-        streams_context = streamablehttp_client(url=server_url)
-        streams = await exit_stack.enter_async_context(streams_context)
-        session = await exit_stack.enter_async_context(ClientSession(*streams))
-        self.sessions[server_id] = session
+        # streams_context = streamablehttp_client(url=server_url)
+        # streams = await exit_stack.enter_async_context(streams_context)
+        # session = await exit_stack.enter_async_context(ClientSession(*streams))
+        # self.sessions[server_id] = session
 
-        try:
-            self.logger.info(f"Initializing session for streamable https server {server_id}")
-            await asyncio.wait_for(self.sessions[server_id].initialize(), timeout=5.0)
-        except TimeoutError:
-            exit_stack.aclose()
-            self.sessions.pop(server_id, None)
-            self.logger.error(f"Timeout while initializing session for server {server_id}")
-            return None
+        # try:
+        #     self.logger.info(f"Initializing session for streamable https server {server_id}")
+        #     await asyncio.wait_for(self.sessions[server_id].initialize(), timeout=5.0)
+        #     # await self.sessions[server_id].initialize()
+        # except TimeoutError:
+        #     self.logger.error(f"Timeout while initializing session for server {server_id}")
+        #     await exit_stack.aclose()
+        #     self.sessions.pop(server_id, None)
+        #     return None
 
-        return session
-    
+        async with (streamablehttp_client(server_url)) as (read_stream, write_stream, _,), ClientSession(read_stream, write_stream) as session:
+            self.sessions[server_id] = session
+            try:
+                self.logger.info(f"Initializing session for streamable https server {server_id}")
+                await asyncio.wait_for(self.sessions[server_id].initialize(), timeout=5.0)
+            except TimeoutError:
+                self.logger.error(f"Timeout while initializing session for server {server_id}")
+                # await exit_stack.aclose()
+                self.sessions.pop(server_id, None)
+            return session
+
     async def cleanup(self):
         """Properly close all MCP connections and clean up resources."""
         self.logger.info("Cleaning up MCP client connections...")

@@ -21,7 +21,13 @@ Usage:
 
     # CURRENT WORKING COMMAND FOR BASIC.PY USING LOCAL_SERVER.PY FROM INIT_PROTO:
     uv run run.py --transport stdio --suite basic --test tool_description_pinjection --cmd python --arg /home/alex/Desktop/projectCompliance/MCPsponge/init_proto/local_server.py
-"""
+
+    #TESTING INVIDEO SSE SERVER
+    uv run run.py --server-id invideo_test --suite basic --test tool_description_pinjection --transport https --url https://mcp.invideo.io/sse
+    
+    #TESTING CANVA HTTPS SERVER
+    uv run run.py --server-id canva_test --suite basic --test tool_description_pinjection --transport https --url https://mcp.canva.com/mcp
+    """
 
 import argparse
 import asyncio
@@ -68,7 +74,7 @@ def create_parser() -> argparse.ArgumentParser:
     shared_parser.add_argument("--transport", choices=["stdio", "https"], required=True, help="Transport method to use")
 
     # This will change once we add more test suites
-    shared_parser.add_argument("--suite", default="basic", choices=["basic","advanced"], required=True, help="Name of testing suite to use")
+    shared_parser.add_argument("--suite", choices=[None,"basic","advanced"], required=True, help="Name of testing suite to use")
     shared_parser.add_argument("--test", default=None, help="Specific test in suite to run, if not run all")
 
     g_stdio = shared_parser.add_argument_group("stdio transport")
@@ -86,6 +92,16 @@ def create_parser() -> argparse.ArgumentParser:
     return shared_parser
 
 async def run_tests(tester_client: MCPTesterClient, server_id: str, suite: str, test: Optional[str], test_kwargs: Dict[str, Any]) -> Any:
+        if not suite:
+            logger.info("Running connection test (no specific suite)")
+            try:
+                session = tester_client.sessions[server_id]
+                response = await session.call_tool("echo", {"message": "Connection test"})
+                logger.info(f"Connection test response: {response}")
+                return response
+            except Exception as e:
+                logger.error(f"Connection test failed: {e}")
+                sys.exit(1)
         try:
             test_registry = TEST_REGISTRY.get(suite)
             common_kwargs = {
@@ -141,7 +157,7 @@ async def main() -> None:
                 )
             })
             await tester_client.connect_server_stdio(server_id, tester_client.server_params[server_id]["server_params"])
-        elif transport == "http":
+        elif transport == "https":
             tester_client = MCPTesterClient(transport="https")
             tester_client.add_server(server_id, {
                 "transport": "streamable_https",
@@ -160,6 +176,7 @@ async def main() -> None:
         sys.exit(1)
 
     try:
+        logger.info("Running tests...")
         await run_tests(tester_client, server_id, suite, test, args)
     except Exception as e:
         logger.error(f"Unexpected error: {e}")

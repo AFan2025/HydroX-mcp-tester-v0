@@ -86,3 +86,18 @@ This tests a standard form of the timeout resource leakage attack common in serv
 
 Methods of Improvement:
 - A lot of Bugs: didn't have time to fix them before m internship period was over and through my relative inexperience with networking. 
+
+# Which MCP Server I tested using in attempting the timeout sponge attack
+- Google Workspace MCP: local | stdio | https://github.com/taylorwilsdon/google_workspace_mcp/tree/main
+This attempt didn't work mainly due to the issues with setting up the continued resource monitoring through stdio. It is difficult to monitor MCP servers spawned through stdio transport as they act as child processes on the CPU. 
+
+- Invideo MCP server: third-party | sse/https | https://mcp.invideo.io/sse
+This was a server that was published through the offical Anthropic MCP website https://docs.claude.com/en/docs/agents-and-tools/remote-mcp-servers. The goal was to test the timeout sponge attacks through API calls to video creation, which is likely to cost quite a bit of compute. The results could be measured through API token calling use. However, it seems like there are issues with this MCP server through HTTPS requests. The server is likely not fully set up yet as there were timeout issues with connecting to the server. 
+
+- Canva MCP Server: third-party | https | https://mcp.canva.com/mcp
+This one, the https request method for calling tools worked. However, I believe some of it was privileged and I couldn't pass certain functions such as sessions.call_tools(). Didn't have enough time at the end of the internship to continue debugging. Likely a good MCP server to test timeout efficacy.
+Logged Instructions: 2025-09-12 16:38:38,585 - httpx - INFO - HTTP Request: POST https://mcp.canva.com/mcp "HTTP/1.1 401 Unauthorized"  
+
+- Box MCP Server: third-party | https | https://mcp.box.com/
+Same issues as Canva.
+
